@@ -168,3 +168,26 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+
+
+/**
+ * Represents the schema for the 'CustomGPT' table.
+ *
+ * This table stores custom GPT configurations created by users.
+ *
+**/
+export const customGPT = pgTable('CustomGPT', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  userId: uuid('userId')
+    .notNull()
+    .references(() => user.id),
+  name: text('name').notNull(),
+  description: text('description').notNull(),
+  model: text('model').notNull(),
+  instructions: text('instructions').notNull(),
+  image: text('image').notNull(),
+  createdAt: timestamp('createdAt').notNull(),
+});
+
+export type CustomGPT = InferSelectModel<typeof customGPT>;

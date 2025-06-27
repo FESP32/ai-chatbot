@@ -27,6 +27,7 @@ import {
   type DBMessage,
   type Chat,
   stream,
+  customGPT,
 } from './schema';
 import type { ArtifactKind } from '@/components/artifact';
 import { generateUUID } from '../utils';
@@ -534,5 +535,62 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
       'bad_request:database',
       'Failed to get stream ids by chat id',
     );
+  }
+}
+
+export async function getGPTById({ id }: { id: string }) {
+  try {
+    const [selectedGPT] = await db
+      .select()
+      .from(customGPT)
+      .where(eq(customGPT.id, id));
+    return selectedGPT;
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to get gpt by id');
+  }
+}
+
+export async function saveCustomGPT({
+  id,
+  userId,
+  name,
+  description,
+  model,
+  instructions,
+  image,
+}: {
+  id?: string;
+  userId: string;
+  name: string;
+  description: string;
+  model: string;
+  instructions: string;
+  image: string;
+}) {
+  try {
+    if (id) {
+      return await db
+        .update(customGPT)
+        .set({
+          name,
+          description,
+          instructions,
+          image,
+          model,
+        })
+        .where(eq(customGPT.id, id));
+    }
+
+    return await db.insert(customGPT).values({
+      createdAt: new Date(),
+      name,
+      description,
+      instructions,
+      image,
+      model,
+      userId,
+    });
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to save custom GPT');
   }
 }
