@@ -28,6 +28,7 @@ import {
   type Chat,
   stream,
   customGPT,
+  CustomGPT,
 } from './schema';
 import type { ArtifactKind } from '@/components/artifact';
 import { generateUUID } from '../utils';
@@ -594,3 +595,99 @@ export async function saveCustomGPT({
     throw new ChatSDKError('bad_request:database', 'Failed to save custom GPT');
   }
 }
+
+export async function getCustomGPTsByUserId({
+  id,
+  limit,
+  startingAfter,
+  endingBefore,
+}: {
+  id: string;
+  limit: number;
+  startingAfter: string | null;
+  endingBefore: string | null;
+}) {
+  try {
+    const extendedLimit = limit + 1;
+
+    const query = (whereCondition?: SQL<any>) =>
+      db
+        .select()
+        .from(customGPT)
+        .where(
+          whereCondition
+            ? and(whereCondition, eq(customGPT.userId, id))
+            : eq(customGPT.userId, id),
+        )
+        .orderBy(desc(customGPT.createdAt))
+        .limit(extendedLimit);
+
+    let filteredCustomGPTs: Array<CustomGPT> = [];
+
+    if (startingAfter) {
+      const [selectedGPT] = await db
+        .select()
+        .from(customGPT)
+        .where(eq(customGPT.id, startingAfter))
+        .limit(1);
+
+      if (!selectedGPT) {
+        throw new ChatSDKError(
+          'not_found:database',
+          `GPT with id ${startingAfter} not found`,
+        );
+      }
+
+      filteredCustomGPTs = await query(
+        gt(customGPT.createdAt, selectedGPT.createdAt),
+      );
+    } else if (endingBefore) {
+      const [selectedGPT] = await db
+        .select()
+        .from(chat)
+        .where(eq(customGPT.id, endingBefore))
+        .limit(1);
+
+      if (!selectedGPT) {
+        throw new ChatSDKError(
+          'not_found:database',
+          `Chat with id ${endingBefore} not found`,
+        );
+      }
+
+      filteredCustomGPTs = await query(
+        lt(chat.createdAt, selectedGPT.createdAt),
+      );
+    } else {
+      filteredCustomGPTs = await query();
+    }
+
+    const hasMore = filteredCustomGPTs.length > limit;
+
+    return {
+      gpts: hasMore ? filteredCustomGPTs.slice(0, limit) : filteredCustomGPTs,
+      hasMore,
+    };
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get GPTs by user id',
+    );
+  }
+}
+
+export async function deleteGPTById({ id }: { id: string }) {
+  try {
+    const [gptsDeleted] = await db
+      .delete(customGPT)
+      .where(eq(customGPT.id, id))
+      .returning();
+    return gptsDeleted;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to delete gpt by id',
+    );
+  }
+}
+

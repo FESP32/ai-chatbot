@@ -16,10 +16,12 @@ import {
 import type { CustomGPT } from '@/lib/db/schema';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { useRouter } from 'next/navigation';
+import { useGptContext } from '@/lib/context/gpt-context';
 
 export default function GPTForm({ gpt }: { gpt?: CustomGPT }) {
 
   const router = useRouter();
+  const { refreshGpts } = useGptContext();
 
   const [form, setForm] = useState({
     id: '',
@@ -58,13 +60,17 @@ export default function GPTForm({ gpt }: { gpt?: CustomGPT }) {
 
       if (!res.ok) throw new Error('Failed to create GPT agent');
 
+      
+
       await res.json();
       toast({
         type: 'success',
         description: `Success ${gpt ? 'Updating' : 'Creating'} Custom GPT!`,
       });
+
+      refreshGpts();
       
-      router.push('/gpts');
+      router.replace('/gpts');
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
