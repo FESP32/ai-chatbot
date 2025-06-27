@@ -3,16 +3,29 @@ import { notFound, redirect } from 'next/navigation';
 
 import { auth } from '@/app/(auth)/auth';
 import { Chat } from '@/components/chat';
-import { getChatById, getMessagesByChatId } from '@/lib/db/queries';
+import { getChatById, getGPTById, getMessagesByChatId } from '@/lib/db/queries';
 import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
-import type { DBMessage } from '@/lib/db/schema';
+import type { CustomGPT, DBMessage } from '@/lib/db/schema';
 import type { Attachment, UIMessage } from 'ai';
 
-export default async function Page(props: { params: Promise<{ id: string }> }) {
+export default async function Page(props: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ g: string }>;
+}) {
   const params = await props.params;
   const { id } = params;
+
+  const searchParams = await props.searchParams;
+  const { g } = searchParams;
+
   const chat = await getChatById({ id });
+
+  let customGPT: CustomGPT | undefined = undefined;
+
+  if (g) {
+    customGPT = await getGPTById({ id: g });
+  }
 
   if (!chat) {
     notFound();
@@ -65,6 +78,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           isReadonly={session?.user?.id !== chat.userId}
           session={session}
           autoResume={true}
+          customGPT={customGPT}
         />
         <DataStreamHandler id={id} />
       </>
@@ -81,6 +95,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         isReadonly={session?.user?.id !== chat.userId}
         session={session}
         autoResume={true}
+        customGPT={customGPT}
       />
       <DataStreamHandler id={id} />
     </>

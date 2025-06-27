@@ -2,11 +2,12 @@ import type { UIMessage } from 'ai';
 import { PreviewMessage, ThinkingMessage } from './message';
 import { Greeting } from './greeting';
 import { memo } from 'react';
-import type { Vote } from '@/lib/db/schema';
+import type { CustomGPT, Vote } from '@/lib/db/schema';
 import equal from 'fast-deep-equal';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { motion } from 'framer-motion';
 import { useMessages } from '@/hooks/use-messages';
+import GPTHeader from './gpt-header';
 
 interface MessagesProps {
   chatId: string;
@@ -17,6 +18,7 @@ interface MessagesProps {
   reload: UseChatHelpers['reload'];
   isReadonly: boolean;
   isArtifactVisible: boolean;
+  customGPT?: CustomGPT;
 }
 
 function PureMessages({
@@ -27,6 +29,7 @@ function PureMessages({
   setMessages,
   reload,
   isReadonly,
+  customGPT,
 }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
@@ -44,7 +47,8 @@ function PureMessages({
       ref={messagesContainerRef}
       className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4 relative"
     >
-      {messages.length === 0 && <Greeting />}
+      {messages.length === 0 &&
+        (customGPT ? <GPTHeader gpt={customGPT} /> : <Greeting />)}
 
       {messages.map((message, index) => (
         <PreviewMessage

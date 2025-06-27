@@ -28,7 +28,7 @@ import {
   type Chat,
   stream,
   customGPT,
-  CustomGPT,
+  type CustomGPT,
 } from './schema';
 import type { ArtifactKind } from '@/components/artifact';
 import { generateUUID } from '../utils';
@@ -690,4 +690,3 @@ export async function deleteGPTById({ id }: { id: string }) {
     );
   }
 }
-
