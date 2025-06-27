@@ -1,6 +1,4 @@
-<a href="https://chat.vercel.ai/">
-  <h1 align="center">LOL</h1>
-</a>
+# Custom GPT Assistant Platform — Development Process & Setup
 
 ## 🛠️ Project Setup
 
@@ -99,3 +97,11 @@ This branch integrated the assistant system with the chat interface.
 ---
 
 > ✅ All features were tested locally before merging into the main branch.
+
+## 📝 Future Improvements / TODOs
+
+- Append each assistant's instruction to the prompt before sending messages, so chats follow the assistant’s purpose and tone.
+- Add tests for new features:
+  - Assistant creation
+  - Viewing/editing/deleting assistants
+  - Chat behavior using selected assistant
