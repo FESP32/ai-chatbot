@@ -1,4 +1,11 @@
 # Custom GPT Assistant Platform — Development Process & Setup
+<<<<<<< HEAD
+=======
+
+[![Open in Vercel](https://img.shields.io/badge/🚀%20Live%20Demo-ai--chatbot--hgss.vercel.app-blue?style=for-the-badge)](https://ai-chatbot-hgss.vercel.app/)
+
+![Thumbnail](./public/thumbnail.png) <!-- Update path if needed -->
+>>>>>>> documentation
 
 ## 🛠️ Project Setup
 
